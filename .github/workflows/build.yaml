@@ -19,33 +19,42 @@ jobs:
           repository: Paisseon/SatellaJailed
           path: SatellaJailed
 
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y jq unzip zip python3 git curl wget
+
+      - name: Install Azule properly (as a repo)
+        run: |
+          git clone https://github.com/Al4ise/Azule.git
+          echo "$PWD/Azule" >> $GITHUB_PATH
+          export PATH="$PWD/Azule:$PATH"
+          azule --help || true
+
       - name: Download IPA from URL
         run: |
           cd SatellaJailed
           echo "Downloading IPA from ${{ inputs.ipa_url }}"
           curl -L -O "${{ inputs.ipa_url }}" || wget "${{ inputs.ipa_url }}"
-          echo "Download complete."
+          echo "Download complete:"
           ls -lh *.ipa || true
 
-      - name: Make patch script executable
-        run: chmod +x SatellaJailed/patch-linux.sh
-
-      - name: Install Azule
-        run: |
-          sudo apt update && sudo apt install jq unzip zip python3 -y
-          git clone https://github.com/Al4ise/Azule.git
-          cd Azule
-          sudo cp azule /usr/local/bin/
-          sudo chmod +x /usr/local/bin/azule
-          azule -h
-
-      - name: Run patch script
+      - name: Run SatellaJailed patch script
         run: |
           cd SatellaJailed
-          sh patch-linux.sh
+          chmod +x patch-linux.sh
+          export PATH="${{ github.workspace }}/Azule:$PATH"
+          echo "Running SatellaJailed patch..."
+          sh patch-linux.sh | tee patch.log
+          echo "Patch completed."
 
-      - name: Upload patched IPA as artifact
+      - name: Show patch log
+        run: |
+          echo "===== Patch Log Output ====="
+          cat SatellaJailed/patch.log || true
+
+      - name: Upload patched IPA
         uses: actions/upload-artifact@v4
         with:
           name: patched-ipa
-          path: SatellaJailed/*.ipa
+          path: SatellaJailed/*_Patched.ipa
