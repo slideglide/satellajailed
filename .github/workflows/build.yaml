@@ -1,0 +1,41 @@
+name: Patch IPA with SatellaJailed
+
+on:
+  workflow_dispatch:
+    inputs:
+      ipa_file:
+        description: "Path to the IPA file (relative to repo root)"
+        required: true
+        type: string
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout your repository
+        uses: actions/checkout@v4
+
+      - name: Checkout SatellaJailed
+        uses: actions/checkout@v4
+        with:
+          repository: Paisseon/SatellaJailed
+          path: SatellaJailed
+
+      - name: Move IPA into SatellaJailed folder
+        run: |
+          mv "${{ github.workspace }}/${{ inputs.ipa_file }}" "${{ github.workspace }}/SatellaJailed/"
+
+      - name: Make patch script executable
+        run: chmod +x SatellaJailed/patch-linux.sh
+
+      - name: Run patch script (Linux)
+        run: |
+          cd SatellaJailed
+          sh patch-linux.sh
+
+      - name: Upload patched IPA as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: patched-ipa
+          path: SatellaJailed/*.ipa
