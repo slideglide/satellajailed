@@ -19,12 +19,14 @@ jobs:
           repository: Paisseon/SatellaJailed
           path: SatellaJailed
 
-      - name: Install dependencies
+      - name: Install dependencies (Azule + system tools)
         run: |
           sudo apt update
-          sudo apt install -y jq unzip zip python3 git curl wget
+          sudo apt install -y \
+            jq unzip zip python3 git curl wget \
+            libplist-utils xmlstarlet libxml2-utils
 
-      - name: Install Azule properly (as a repo)
+      - name: Install Azule properly (git repo)
         run: |
           git clone https://github.com/Al4ise/Azule.git
           echo "$PWD/Azule" >> $GITHUB_PATH
@@ -39,7 +41,7 @@ jobs:
           echo "Download complete:"
           ls -lh *.ipa || true
 
-      - name: Run SatellaJailed patch script
+      - name: Run SatellaJailed patch
         run: |
           cd SatellaJailed
           chmod +x patch-linux.sh
