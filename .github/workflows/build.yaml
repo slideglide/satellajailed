@@ -37,7 +37,7 @@ jobs:
           cd Azule
           sudo cp azule /usr/local/bin/
           sudo chmod +x /usr/local/bin/azule
-          azule --help
+          azule -h
 
       - name: Run patch script
         run: |
