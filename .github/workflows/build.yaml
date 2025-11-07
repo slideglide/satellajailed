@@ -30,6 +30,15 @@ jobs:
       - name: Make patch script executable
         run: chmod +x SatellaJailed/patch-linux.sh
 
+      - name: Install Azule
+        run: |
+          sudo apt update && sudo apt install jq unzip zip python3 -y
+          git clone https://github.com/Al4ise/Azule.git
+          cd Azule
+          sudo cp azule /usr/local/bin/
+          sudo chmod +x /usr/local/bin/azule
+          azule --help
+
       - name: Run patch script
         run: |
           cd SatellaJailed
