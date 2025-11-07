@@ -1,10 +1,10 @@
-name: Patch IPA with SatellaJailed
+name: Patch IPA from URL with SatellaJailed
 
 on:
   workflow_dispatch:
     inputs:
-      ipa_file:
-        description: "Path to the IPA file (relative to repo root)"
+      ipa_url:
+        description: "Direct download URL to the IPA file"
         required: true
         type: string
 
@@ -13,23 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout your repository
-        uses: actions/checkout@v4
-
       - name: Checkout SatellaJailed
         uses: actions/checkout@v4
         with:
           repository: Paisseon/SatellaJailed
           path: SatellaJailed
 
-      - name: Move IPA into SatellaJailed folder
+      - name: Download IPA from URL
         run: |
-          mv "${{ github.workspace }}/${{ inputs.ipa_file }}" "${{ github.workspace }}/SatellaJailed/"
+          cd SatellaJailed
+          echo "Downloading IPA from ${{ inputs.ipa_url }}"
+          curl -L -O "${{ inputs.ipa_url }}" || wget "${{ inputs.ipa_url }}"
+          echo "Download complete."
+          ls -lh *.ipa || true
 
       - name: Make patch script executable
         run: chmod +x SatellaJailed/patch-linux.sh
 
-      - name: Run patch script (Linux)
+      - name: Run patch script
         run: |
           cd SatellaJailed
           sh patch-linux.sh
